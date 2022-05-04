@@ -15,7 +15,7 @@
 
 
 
-cd /scratch/ws/0/cosi765e-python_virtual_environment/pytorch-cifar
+cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 module --force purge
 module load modenv/hiera  GCC/10.2.0  CUDA/11.1.1  OpenMPI/4.0.5 PyTorch/1.9.0
 
