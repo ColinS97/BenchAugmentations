@@ -19,5 +19,7 @@ cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-
 module --force purge
 module load modenv/hiera  GCC/10.2.0  CUDA/11.1.1  OpenMPI/4.0.5 PyTorch/1.9.0
 
+pip install --yes imgaug
+
 python main.py --epochs 200
 python main.py --epochs 200 --randaugment
