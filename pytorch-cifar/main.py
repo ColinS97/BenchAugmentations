@@ -30,6 +30,8 @@ parser.add_argument('--resume', '-r', action='store_true',
                     help='resume from checkpoint')
 parser.add_argument('--deepaugment', '-da', action='store_true',
                     help='use deepaugment policy for data augmentation place policy.txt next to this file')
+parser.add_argument('--randaugment', '-ra', action='store_true',
+                    help='use randaugment transformer for data augmentation')
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -41,18 +43,18 @@ print('==> Preparing data..')
 
 if args.deepaugment:
     # check if deepaugment argument is set.
+    ckpt_filename = 'deepaugment_' + ckpt_filename
     transform_train = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
     trainset = torchvision.datasets.CIFAR10(
         root='./data', train=True, download=True, transform=transform_train)
-    ckpt_filename = 'deepaugment_' + ckpt_filename
     numpy_X = trainset.data
     numpy_y = np.asarray(trainset.targets)
     policies_df = pd.read_csv('deepaug_policies.csv')
-    policies_list = load_k_policies_from_csv(policies_df, k=2)
-    trainset = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=BATCH_SIZE)
+    policies_list = load_k_policies_from_csv(policies_df, k=20)
+    trainloader = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=BATCH_SIZE)
 else:
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
@@ -62,6 +64,22 @@ else:
     ])
     trainset = torchvision.datasets.CIFAR10(
         root='./data', train=True, download=True, transform=transform_train)
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=BATCH_SIZE, shuffle=True)
+
+if args.randaugment:
+    ckpt_filename = 'randaugment_' + ckpt_filename
+    transform_train = transforms.Compose([
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(25),
+        transforms.RandAugment(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+    trainset = torchvision.datasets.CIFAR10(
+        root='./data', train=True, download=True, transform=transform_train)
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=BATCH_SIZE, shuffle=True)
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
@@ -73,8 +91,7 @@ testset = torchvision.datasets.CIFAR10(
 testloader = torch.utils.data.DataLoader(
     testset, batch_size=100, shuffle=False)
 
-trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=BATCH_SIZE, shuffle=True)
+
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
            'dog', 'frog', 'horse', 'ship', 'truck')
