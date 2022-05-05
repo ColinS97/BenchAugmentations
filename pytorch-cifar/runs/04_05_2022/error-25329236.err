@@ -1,0 +1,18 @@
+Module GCC/10.2.0CUDA/11.1.1OpenMPI/4.0.5PyTorch/1.9.0 and 54 dependencies loaded.
+
+Usage:   
+  pip install [options] <requirement specifier> [package-index-options] ...
+  pip install [options] -r <requirements file> [package-index-options] ...
+  pip install [options] [-e] <vcs project url> ...
+  pip install [options] [-e] <local project path> ...
+  pip install [options] <archive url/path> ...
+
+no such option: --yes
+Traceback (most recent call last):
+  File "main.py", line 17, in <module>
+    from deepaugment.image_generator import deepaugment_image_generator
+  File "/lustre/scratch2/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar/deepaugment/image_generator.py", line 3, in <module>
+    from deepaugment.augmenter import augment_by_policy
+  File "/lustre/scratch2/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar/deepaugment/augmenter.py", line 4, in <module>
+    from imgaug import augmenters as iaa
+ModuleNotFoundError: No module named 'imgaug'

@@ -7,6 +7,7 @@ import torch.backends.cudnn as cudnn
 
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.datasets as datasets
 
 import os
 import argparse
@@ -22,6 +23,7 @@ from utils import progress_bar
 
 BATCH_SIZE = 128
 ckpt_filename = 'ckpt.pth'
+data_dir = './data'
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
@@ -42,19 +44,37 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 print('==> Preparing data..')
 
 if args.deepaugment:
+    from PIL import Image
+
     # check if deepaugment argument is set.
-    ckpt_filename = 'deepaugment_' + ckpt_filename
-    transform_train = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    ])
     trainset = torchvision.datasets.CIFAR10(
-        root='./data', train=True, download=True, transform=transform_train)
+        root=data_dir, train=True, download=True)
     numpy_X = trainset.data
     numpy_y = np.asarray(trainset.targets)
     policies_df = pd.read_csv('deepaug_policies.csv')
     policies_list = load_k_policies_from_csv(policies_df, k=20)
-    trainloader = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=BATCH_SIZE)
+    image_gen = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=1)
+    data_dir = './data/cifar-10-deepaugment'
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+
+    counter = 0
+    for image, label in image_gen:
+        # print('test')
+        label = label[0]
+        if not os.path.isdir(data_dir + '/' + str(label)):
+            os.mkdir(data_dir + '/' + str(label))
+        Image.fromarray(image[0]).save(data_dir + '/' + str(label) + '/' + str(label) + '_' + str(counter) + '.jpeg')
+        counter += 1
+
+    transform_train = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+    ])
+    trainset = datasets.ImageFolder(
+        data_dir, transform_train
+    )
+
 else:
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
@@ -64,8 +84,6 @@ else:
     ])
     trainset = torchvision.datasets.CIFAR10(
         root='./data', train=True, download=True, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=BATCH_SIZE, shuffle=True)
 
 if args.randaugment:
     ckpt_filename = 'randaugment_' + ckpt_filename
@@ -77,9 +95,12 @@ if args.randaugment:
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
     trainset = torchvision.datasets.CIFAR10(
-        root='./data', train=True, download=True, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=BATCH_SIZE, shuffle=True)
+        root=data_dir, train=True, download=True, transform=transform_train)
+
+
+
+trainloader = torch.utils.data.DataLoader(
+    trainset, batch_size=BATCH_SIZE, shuffle=True)
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
@@ -90,8 +111,6 @@ testset = torchvision.datasets.CIFAR10(
     root='./data', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(
     testset, batch_size=100, shuffle=False)
-
-
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
            'dog', 'frog', 'horse', 'ship', 'truck')
@@ -188,7 +207,7 @@ def test(epoch):
         }
         if not os.path.isdir('checkpoint'):
             os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/'+ckpt_filename)
+        torch.save(state, './checkpoint/' + ckpt_filename)
         best_acc = acc
 
 

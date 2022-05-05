@@ -157,43 +157,42 @@ def deepaugment_image_generator(X, y, policy, batch_size=64, augment_chance=0.5,
         print(policy)
         print()
 
-    while True:
-        ix = np.arange(len(X))
-        np.random.shuffle(ix)
-        for i in range(len(X) // batch_size):
-            _ix = ix[i * batch_size: (i + 1) * batch_size]
-            _X = X[_ix]
-            _y = y[_ix]
+    ix = np.arange(len(X))
+    np.random.shuffle(ix)
 
-            tiny_batch_size = 4
-            aug_X = _X[0:tiny_batch_size]
-            aug_y = _y[0:tiny_batch_size]
-            # images are given to the augenter in batches of 5
-            for j in range(1, len(_X) // tiny_batch_size):
-                tiny_X = _X[j * tiny_batch_size: (j + 1) * tiny_batch_size]
-                tiny_y = _y[j * tiny_batch_size: (j + 1) * tiny_batch_size]
-                # if the random number is smaller than the augment_chance, augment the tiny batch of images
-                if np.random.rand() <= augment_chance:
-                    # select a random policy from usually the top 20 policies
-                    aug_chain = np.random.choice(policy)
-                    aug_chain[
-                        "portion"
-                    ] = 1.0  # last element is portion, which we want to be 1
-                    hyperparams = list(aug_chain.values())
+    for i in range(len(X) // batch_size):
+        _ix = ix[i * batch_size: (i + 1) * batch_size]
+        _X = X[_ix]
+        _y = y[_ix]
 
-                    aug_data = augment_by_policy(tiny_X, tiny_y, *hyperparams)
+        tiny_batch_size = 4
+        aug_X = _X[0:tiny_batch_size]
+        aug_y = _y[0:tiny_batch_size]
+        # images are given to the augenter in batches of 5
+        for j in range(1, len(_X) // tiny_batch_size):
+            tiny_X = _X[j * tiny_batch_size: (j + 1) * tiny_batch_size]
+            tiny_y = _y[j * tiny_batch_size: (j + 1) * tiny_batch_size]
+            # if the random number is smaller than the augment_chance, augment the tiny batch of images
+            if np.random.rand() <= augment_chance:
+                # select a random policy from usually the top 20 policies
+                aug_chain = np.random.choice(policy)
+                aug_chain[
+                    "portion"
+                ] = 1.0  # last element is portion, which we want to be 1
+                hyperparams = list(aug_chain.values())
 
-                    # commented out because it was causing errors
-                    aug_data["X_train"] = apply_default_transformations(
-                        aug_data["X_train"]
-                    )
+                aug_data = augment_by_policy(tiny_X, tiny_y, *hyperparams)
 
-                    aug_X = np.concatenate([aug_X, aug_data["X_train"]])
-                    aug_y = np.concatenate([aug_y, aug_data["y_train"]])
-                else:
-                    aug_X = np.concatenate([aug_X, tiny_X])
-                    aug_y = np.concatenate([aug_y, tiny_y])
-            yield aug_X.astype(np.uint8), aug_y
+                aug_data["X_train"] = apply_default_transformations(
+                    aug_data["X_train"]
+                )
+
+                aug_X = np.concatenate([aug_X, aug_data["X_train"]])
+                aug_y = np.concatenate([aug_y, aug_data["y_train"]])
+            else:
+                aug_X = np.concatenate([aug_X, tiny_X])
+                aug_y = np.concatenate([aug_y, tiny_y])
+        yield aug_X.astype(np.uint8), aug_y
 
 
 X = np.random.rand(200, 32, 32, 3)

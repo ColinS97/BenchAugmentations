@@ -1,0 +1,37 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting imgaug
+  Using cached imgaug-0.4.0-py2.py3-none-any.whl (948 kB)
+Requirement already satisfied: Pillow in /software/haswell/Pillow/8.0.1-GCCcore-10.2.0/lib/python3.8/site-packages (from imgaug) (8.0.1)
+Collecting opencv-python
+  Using cached opencv_python-4.5.5.64-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (60.5 MB)
+Collecting imageio
+  Using cached imageio-2.19.0-py3-none-any.whl (3.4 MB)
+Requirement already satisfied: six in /software/haswell/Python/3.8.6-GCCcore-10.2.0/lib/python3.8/site-packages (from imgaug) (1.15.0)
+Collecting scikit-image>=0.14.2
+  Using cached scikit_image-0.19.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (14.0 MB)
+Requirement already satisfied: scipy in /software/haswell/SciPy-bundle/2020.11-fosscuda-2020b/lib/python3.8/site-packages (from imgaug) (1.5.4)
+Collecting Shapely
+  Downloading Shapely-1.8.2-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (2.1 MB)
+Requirement already satisfied: numpy>=1.15 in /software/haswell/SciPy-bundle/2020.11-fosscuda-2020b/lib/python3.8/site-packages (from imgaug) (1.19.4)
+Collecting matplotlib
+  Downloading matplotlib-3.5.2-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (11.3 MB)
+Collecting networkx>=2.2
+  Using cached networkx-2.8-py3-none-any.whl (2.0 MB)
+Collecting tifffile>=2019.7.26
+  Downloading tifffile-2022.5.4-py3-none-any.whl (195 kB)
+Requirement already satisfied: packaging>=20.0 in /software/haswell/Python/3.8.6-GCCcore-10.2.0/lib/python3.8/site-packages (from scikit-image>=0.14.2->imgaug) (20.4)
+Collecting PyWavelets>=1.1.1
+  Using cached PyWavelets-1.3.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.9 MB)
+Collecting fonttools>=4.22.0
+  Using cached fonttools-4.33.3-py3-none-any.whl (930 kB)
+Collecting kiwisolver>=1.0.1
+  Using cached kiwisolver-1.4.2-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (1.2 MB)
+Requirement already satisfied: pyparsing>=2.2.1 in /software/haswell/Python/3.8.6-GCCcore-10.2.0/lib/python3.8/site-packages (from matplotlib->imgaug) (2.4.7)
+Collecting cycler>=0.10
+  Using cached cycler-0.11.0-py3-none-any.whl (6.4 kB)
+Requirement already satisfied: python-dateutil>=2.7 in /software/haswell/Python/3.8.6-GCCcore-10.2.0/lib/python3.8/site-packages (from matplotlib->imgaug) (2.8.1)
+Installing collected packages: opencv-python, imageio, networkx, tifffile, PyWavelets, scikit-image, Shapely, fonttools, kiwisolver, cycler, matplotlib, imgaug
+Successfully installed PyWavelets-1.3.0 Shapely-1.8.2 cycler-0.11.0 fonttools-4.33.3 imageio-2.19.0 imgaug-0.4.0 kiwisolver-1.4.2 matplotlib-3.5.2 networkx-2.8 opencv-python-4.5.5.64 scikit-image-0.19.2 tifffile-2022.5.4
+==> Preparing data..
+Downloading https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz to ./data/cifar-10-python.tar.gz
+Extracting ./data/cifar-10-python.tar.gz to ./data
