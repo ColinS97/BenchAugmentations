@@ -44,6 +44,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 print('==> Preparing data..')
 
 if args.deepaugment:
+    ckpt_filename = 'deepaugment_' + ckpt_filename
     from PIL import Image
 
     # check if deepaugment argument is set.
@@ -53,7 +54,7 @@ if args.deepaugment:
     numpy_y = np.asarray(trainset.targets)
     policies_df = pd.read_csv('deepaug_policies.csv')
     policies_list = load_k_policies_from_csv(policies_df, k=20)
-    image_gen = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=1)
+    image_gen = deepaugment_image_generator(numpy_X, numpy_y, policies_list, batch_size=1, show_policy=True)
     data_dir = './data/cifar-10-deepaugment'
     if not os.path.isdir(data_dir):
         os.mkdir(data_dir)
@@ -64,7 +65,7 @@ if args.deepaugment:
         label = label[0]
         if not os.path.isdir(data_dir + '/' + str(label)):
             os.mkdir(data_dir + '/' + str(label))
-        Image.fromarray(image[0]).save(data_dir + '/' + str(label) + '/' + str(label) + '_' + str(counter) + '.jpeg')
+        #Image.fromarray(image[0]).save(data_dir + '/' + str(label) + '/' + str(label) + '_' + str(counter) + '.jpeg')
         counter += 1
 
     transform_train = transforms.Compose([

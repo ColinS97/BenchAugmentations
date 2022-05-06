@@ -290,7 +290,7 @@ def load_k_policies_from_csv(nb_df, k=20):
         "mean_late_val_acc", "expected_accuracy_increase(%)"
     ]
     top_df = top_df[SELECT]
-
+    top_df.to_csv("top_"+str(k)+"_policies.csv", index=False)
     top_policies_list = top_df[
         ['A_aug1_type', 'A_aug1_magnitude', 'A_aug2_type', 'A_aug2_magnitude',
          'B_aug1_type', 'B_aug1_magnitude', 'B_aug2_type', 'B_aug2_magnitude',
