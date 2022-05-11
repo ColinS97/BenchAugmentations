@@ -1,5 +1,6 @@
 import os
 
+import argparse
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -21,6 +22,17 @@ seed_everything(7)
 PATH_DATASETS = './data'
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
+
+parser = argparse.ArgumentParser(description='PyTorch Lightning CIFAR10 Training')
+parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
+parser.add_argument('--epochs', default=10, type=int, help='how many epochs should the net train for')
+parser.add_argument('--resume', '-r', action='store_true',
+                    help='resume from checkpoint')
+parser.add_argument('--deepaugment', '-da', action='store_true',
+                    help='use deepaugment policy for data augmentation place policy.txt next to this file')
+parser.add_argument('--randaugment', '-ra', action='store_true',
+                    help='use randaugment transformer for data augmentation')
+args = parser.parse_args()
 
 train_transforms = torchvision.transforms.Compose(
     [
@@ -110,7 +122,7 @@ class LitResnet(LightningModule):
 model = LitResnet(lr=0.05)
 
 trainer = Trainer(
-    max_epochs=30,
+    max_epochs=args.epochs,
     accelerator="auto",
     devices=1 if torch.cuda.is_available() else None,  # limiting got iPython runs
     logger=CSVLogger(save_dir="logs/"),
