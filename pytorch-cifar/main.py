@@ -45,9 +45,6 @@ print('==> Preparing data..')
 
 if args.deepaugment:
     ckpt_filename = 'deepaugment_' + ckpt_filename
-    from PIL import Image
-
-    # check if deepaugment argument is set.
     trainset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=True)
     numpy_X = trainset.data
@@ -65,7 +62,7 @@ if args.deepaugment:
         label = label[0]
         if not os.path.isdir(data_dir + '/' + str(label)):
             os.mkdir(data_dir + '/' + str(label))
-        #Image.fromarray(image[0]).save(data_dir + '/' + str(label) + '/' + str(label) + '_' + str(counter) + '.jpeg')
+        # Image.fromarray(image[0]).save(data_dir + '/' + str(label) + '/' + str(label) + '_' + str(counter) + '.jpeg')
         counter += 1
 
     transform_train = transforms.Compose([
@@ -76,7 +73,7 @@ if args.deepaugment:
         data_dir, transform_train
     )
 
-else:
+if args.baseline:
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -98,8 +95,6 @@ if args.randaugment:
     trainset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=True, transform=transform_train)
 
-
-
 trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=BATCH_SIZE, shuffle=True)
 
@@ -118,21 +113,8 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer',
 
 # Model
 print('==> Building model..')
-# net = VGG('VGG19')
 net = ResNet18()
-# net = PreActResNet18()
-# net = GoogLeNet()
-# net = DenseNet121()
-# net = ResNeXt29_2x64d()
-# net = MobileNet()
-# net = MobileNetV2()
-# net = DPN92()
-# net = ShuffleNetG2()
-# net = SENet18()
-# net = ShuffleNetV2(1)
-# net = EfficientNetB0()
-# net = RegNetX_200MF()
-# net = SimpleDLA()
+
 net = net.to(device)
 if device == 'cuda':
     net = torch.nn.DataParallel(net)
