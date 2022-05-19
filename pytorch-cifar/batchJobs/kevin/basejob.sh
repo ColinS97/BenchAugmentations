@@ -9,7 +9,7 @@
 #SBATCH --time=24:00:00                             
 #SBATCH --job-name=base
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=kevin.kirsten@mailbox.tu-dresden.de
+#SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-base-%j.out
 
 ##SBATCH --error=error-%j.err
