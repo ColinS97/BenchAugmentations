@@ -1,2 +1,4 @@
 /pytorch-cifar/data/
 /pytorch-cifar/__pycache__/
+/pytorch-cifar/models/__pycache__/
+/pytorch-cifar/deepaugment/__pycache__/
