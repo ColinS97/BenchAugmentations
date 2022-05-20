@@ -1,4 +1,3 @@
-from msilib.schema import Error
 import os
 
 import argparse
@@ -100,7 +99,7 @@ if args.trivialaugment:
 
 
 if args.deepaugment:
-    raise Error("deepaugment not implemented yet")
+    raise ValueError("deepaugment not implemented yet")
 
 
 train_transforms_list.append(
