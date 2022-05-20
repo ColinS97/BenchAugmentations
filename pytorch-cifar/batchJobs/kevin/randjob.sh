@@ -11,8 +11,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-randaugment-%j.out
-
-##SBATCH --error=error-randaugment-%j.err
+#SBATCH --error=error-randaugment-%j.err
 
 module --force purge                          				
 module load modenv/hiera CUDA/11.3.1 GCC/11.2.0 Python/3.9.6
