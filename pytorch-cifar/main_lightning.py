@@ -1,3 +1,4 @@
+from msilib.schema import Error
 import os
 
 import argparse
@@ -17,31 +18,95 @@ from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim.swa_utils import AveragedModel, update_bn
 from torchmetrics.functional import accuracy
 
+import aug_lib
+
 seed_everything(7)
 
-PATH_DATASETS = './data'
+PATH_DATASETS = "./data"
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
 
-parser = argparse.ArgumentParser(description='PyTorch Lightning CIFAR10 Training')
-parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
-parser.add_argument('--epochs', default=10, type=int, help='how many epochs should the net train for')
-parser.add_argument('--resume', '-r', action='store_true',
-                    help='resume from checkpoint')
-parser.add_argument('--deepaugment', '-da', action='store_true',
-                    help='use deepaugment policy for data augmentation place policy.txt next to this file')
-parser.add_argument('--randaugment', '-ra', action='store_true',
-                    help='use randaugment transformer for data augmentation')
+parser = argparse.ArgumentParser(description="PyTorch Lightning CIFAR10 Training")
+parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
+parser.add_argument(
+    "--epochs", default=10, type=int, help="how many epochs should the net train for"
+)
+parser.add_argument(
+    "--resume", "-r", action="store_true", help="resume from checkpoint"
+)
+parser.add_argument(
+    "--deepaugment",
+    "-da",
+    action="store_true",
+    help="use deepaugment policy for data augmentation place policy.txt next to this file",
+)
+parser.add_argument(
+    "--baseline",
+    "-ba",
+    action="store_true",
+    help="use baseline transforms for data augmentation",
+)
+parser.add_argument(
+    "--randaugment",
+    "-ra",
+    action="store_true",
+    help="use randaugment transformer for data augmentation",
+)
+parser.add_argument(
+    "--trivialaugment",
+    "-ta",
+    action="store_true",
+    help="use trivialaugment transformer for data augmentation",
+)
+
+
 args = parser.parse_args()
 
-train_transforms = torchvision.transforms.Compose(
-    [
-        torchvision.transforms.RandomCrop(32, padding=4),
-        torchvision.transforms.RandomHorizontalFlip(),
-        torchvision.transforms.ToTensor(),
-        cifar10_normalization(),
+
+def validate_args(args):
+    bools = [
+        args.randaugment,
+        args.deepaugment,
+        args.trivialaugment,
+        args.baseline,
+        args.resume,
     ]
+    print(sum(bools))
+    if sum(bools) > 1:
+        raise ValueError(
+            "Only one of --randaugment, --deepaugment, --baseline, --trivialaugment, --resume can be used"
+        )
+
+
+validate_args(args)
+
+train_transforms_list = []
+
+if args.baseline:
+    train_transforms_list.append(
+        [
+            torchvision.transforms.RandomCrop(32, padding=4),
+            torchvision.transforms.RandomHorizontalFlip(),
+        ]
+    )
+
+if args.randaugment:
+    train_transforms_list.append(aug_lib.RandAugment())
+
+if args.trivialaugment:
+    train_transforms_list.append(aug_lib.TrivialAugment())
+
+
+if args.deepaugment:
+    raise Error("deepaugment not implemented yet")
+
+
+train_transforms_list.append(
+    [torchvision.transforms.ToTensor(), cifar10_normalization()]
 )
+
+
+train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
 test_transforms = torchvision.transforms.Compose(
     [
@@ -59,11 +124,15 @@ cifar10_dm = CIFAR10DataModule(
     val_transforms=test_transforms,
 )
 
+
 def create_model():
     model = torchvision.models.resnet18(pretrained=False, num_classes=10)
-    model.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    model.conv1 = nn.Conv2d(
+        3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False
+    )
     model.maxpool = nn.Identity()
     return model
+
 
 class LitResnet(LightningModule):
     def __init__(self, lr=0.05):
@@ -119,6 +188,7 @@ class LitResnet(LightningModule):
         }
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
 
+
 model = LitResnet(lr=0.05)
 
 trainer = Trainer(
@@ -126,8 +196,11 @@ trainer = Trainer(
     accelerator="auto",
     devices=1 if torch.cuda.is_available() else None,  # limiting got iPython runs
     logger=CSVLogger(save_dir="logs/"),
-    callbacks=[LearningRateMonitor(logging_interval="step"), TQDMProgressBar(refresh_rate=10)],
+    callbacks=[
+        LearningRateMonitor(logging_interval="step"),
+        TQDMProgressBar(refresh_rate=10),
+    ],
 )
 
-trainer.fit(model, cifar10_dm)
-trainer.test(model, datamodule=cifar10_dm)
+# trainer.fit(model, cifar10_dm)
+# trainer.test(model, datamodule=cifar10_dm)
