@@ -162,8 +162,8 @@ class LitResnet(LightningModule):
         acc = accuracy(preds, y)
 
         if stage:
-            self.log(f"{stage}_loss", loss, prog_bar=True)
-            self.log(f"{stage}_acc", acc, prog_bar=True)
+            self.log(f"{stage}_loss", loss, prog_bar=True, sync_dist=True)
+            self.log(f"{stage}_acc", acc, prog_bar=True, sync_dist=True)
 
     def validation_step(self, batch, batch_idx):
         self.evaluate(batch, "val")
@@ -196,7 +196,7 @@ model = LitResnet(lr=0.05)
 trainer = Trainer(
     max_epochs=args.epochs,
     accelerator="gpu",
-    devices=4,  # TODO: automatically detect number of devices
+    gpus=-1,  # TODO: automatically detect number of devices
     strategy="ddp",
     logger=CSVLogger(save_dir="logs/"),
     callbacks=[
