@@ -433,8 +433,10 @@ def set_augmentation_space(
             median,
             gaussian,
         ]
-    elif "deepaugment_cifartop10" in augmentation_space:
-        ALL_TRANSFORMS = [identity, auto_contrast]
+    elif "deepaugment" in augmentation_space:
+        pass
+        # since deepaug is using imgaug instead of pillow the transforms are not the same and can't be copied over completely trivially
+        # ALL_TRANSFORMS = [crop_bilinear, gaussian, rotate, shear_x, shear_y, translate_x, translate_y, sharpen, emboss, additive_gaussian_noise, dropout, coarse-dropout, gamma-contrast, brighten, invert, fog, clouds, add-to-hue-and-saturation, coarse-salt-pepper, horizontal-flip, vertical-flip ]
     elif "rasubsetof" in augmentation_space:
         r = re.findall(r"rasubsetof(\d+)", augmentation_space)
         assert len(r) == 1

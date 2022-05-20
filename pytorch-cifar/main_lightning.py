@@ -22,6 +22,8 @@ import aug_lib
 
 seed_everything(7)
 
+print("CPU Count:", os.cpu_count())
+
 PATH_DATASETS = "./data"
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
@@ -80,7 +82,7 @@ def validate_args(args):
 
 validate_args(args)
 
-train_transforms_list = []
+train_transforms_list = [torchvision.transforms.ToPILImage()]
 
 if args.baseline:
     train_transforms_list.append(
@@ -193,8 +195,9 @@ model = LitResnet(lr=0.05)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    accelerator="auto",
-    devices=1 if torch.cuda.is_available() else None,  # limiting got iPython runs
+    accelerator="gpu",
+    devices=4,  # TODO: automatically detect number of devices
+    strategy="ddp",
     logger=CSVLogger(save_dir="logs/"),
     callbacks=[
         LearningRateMonitor(logging_interval="step"),
@@ -202,5 +205,5 @@ trainer = Trainer(
     ],
 )
 
-# trainer.fit(model, cifar10_dm)
-# trainer.test(model, datamodule=cifar10_dm)
+trainer.fit(model, cifar10_dm)
+trainer.test(model, datamodule=cifar10_dm)

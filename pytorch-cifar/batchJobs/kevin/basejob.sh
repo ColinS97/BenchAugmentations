@@ -3,11 +3,11 @@
 #SBATCH --no-requeue
 #SBATCH --partition=alpha
 #SBATCH --nodes=1                   
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --mem=8000
-#SBATCH --mincpus=1
-#SBATCH --time=24:00:00                             
-#SBATCH --job-name=base
+#SBATCH --mincpus=4
+#SBATCH --time=08:00:00                             
+#SBATCH --job-name=baseline
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-base-%j.out
@@ -36,7 +36,7 @@ pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.py
 pip install imgaug pandas pytorch-lightning lightning-bolts torchmetrics
 
 
-python main_lightning.py --epochs 10
+python main_lightning.py --epochs 100 --baseline
 
 deactivate
 
