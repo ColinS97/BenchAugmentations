@@ -3,9 +3,9 @@
 #SBATCH --no-requeue
 #SBATCH --partition=alpha
 #SBATCH --nodes=1                   
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --mem=8000
-#SBATCH --mincpus=4
+#SBATCH --mincpus=1
 #SBATCH --time=08:00:00                             
 #SBATCH --job-name=deepaugment
 #SBATCH --mail-type=ALL
