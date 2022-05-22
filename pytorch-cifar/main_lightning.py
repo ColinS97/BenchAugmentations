@@ -81,7 +81,7 @@ def validate_args(args):
 
 validate_args(args)
 
-train_transforms_list = [torchvision.transforms.ToPILImage()]
+train_transforms_list = []
 
 if args.baseline:
     train_transforms_list.append(
