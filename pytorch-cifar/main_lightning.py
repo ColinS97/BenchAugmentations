@@ -194,8 +194,8 @@ model = LitResnet(lr=0.05)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    accelerator="gpu",
-    gpus=-1,  # TODO: automatically detect number of devices
+    accelerator="ddp",
+    gpus=-1,  # -1 equals the number of available gpus
     strategy="ddp",
     logger=CSVLogger(save_dir="logs/"),
     callbacks=[
