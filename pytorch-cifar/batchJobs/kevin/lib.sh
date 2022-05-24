@@ -32,7 +32,7 @@ create_or_reuse_environment() {
         source $ENV_PATH/pyenv/bin/activate
 
     else
-        echo "Error: Directory $ENV_PATH does not exists."
+        echo "Directory $ENV_PATH does not exist."
         create_new_environment py39-cu11-torch-lightning
     fi
     

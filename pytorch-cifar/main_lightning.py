@@ -195,7 +195,7 @@ model = LitResnet(lr=0.05)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    strategy="ddp_find_unused_parameters_false",
+    strategy="ddp",
     accelerator="gpu",
     devices="auto",
     logger=CSVLogger(save_dir="logs/"),
