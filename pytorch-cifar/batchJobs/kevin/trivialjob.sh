@@ -13,10 +13,11 @@
 #SBATCH --output=output-trivialaugment-%j.out
 #SBATCH --error=error-trivialaugment-%j.out
 
-source lib.sh
 
 module --force purge                          				
 module load modenv/hiera CUDA/11.3.1 GCC/11.2.0 Python/3.9.6
+
+source lib.sh
 
 create_or_reuse_environment
 
