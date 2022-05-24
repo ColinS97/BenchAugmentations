@@ -26,11 +26,11 @@ create_or_reuse_environment() {
     ENV_PATH=/lustre/ssd/ws/cosi765e-pyjob_py39-cu11-torch-lightning
     if [ -d "$ENV_PATH" ] 
     then
-        echo "Directory /path/to/dir exists."
+        echo "Directory $ENV_PATH."
         source $ENV_PATH/pyenv/bin/activate
 
     else
-        echo "Error: Directory /path/to/dir does not exists."
+        echo "Error: Directory $ENV_PATH does not exists."
         create_new_environment py39-cu11-torch-lightning
     fi
     
