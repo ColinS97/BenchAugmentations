@@ -5,7 +5,6 @@ from PIL import ImageOps, ImageEnhance, ImageFilter, Image, ImageDraw
 import random
 from dataclasses import dataclass
 from typing import Union
-import torch
 
 
 @dataclass
@@ -633,7 +632,7 @@ def num_augmentations():
     return len(ALL_TRANSFORMS)
 
 
-class TrivialAugment(torch.nn.Module):
+class TrivialAugment:
     def __call__(self, img):
         op = random.choices(ALL_TRANSFORMS, k=1)[0]
         level = random.randint(0, PARAMETER_MAX)
