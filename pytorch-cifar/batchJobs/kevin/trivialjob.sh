@@ -3,15 +3,15 @@
 #SBATCH --no-requeue
 #SBATCH --partition=alpha
 #SBATCH --nodes=1                   
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --mem=8000
-#SBATCH --mincpus=1
+#SBATCH --mincpus=4
 #SBATCH --time=08:00:00                             
 #SBATCH --job-name=trivialaugment
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-trivialaugment-%j.out
-#SBATCH --error=error-trivialaugment-%j.err
+#SBATCH --error=error-trivialaugment-%j.out
 
 source lib.sh
 
