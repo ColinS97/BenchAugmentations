@@ -35,7 +35,7 @@ pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.py
 pip install imgaug pandas pytorch-lightning lightning-bolts torchmetrics
 
 
-python main_lightning.py --epochs 100 --baseline
+python main_lightning.py --epochs 10 --baseline
 
 deactivate
 
