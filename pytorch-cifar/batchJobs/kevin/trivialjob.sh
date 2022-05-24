@@ -26,4 +26,3 @@ which pip
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 
 python main_lightning.py --epochs 10 --trivialaugment
-
