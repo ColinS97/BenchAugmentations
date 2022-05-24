@@ -25,7 +25,7 @@ print("CPU Count:", os.cpu_count())
 
 PATH_DATASETS = "./data"
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
-NUM_WORKERS = 2  # int(os.cpu_count() / 2)
+NUM_WORKERS = int(os.cpu_count() / 2)
 
 parser = argparse.ArgumentParser(description="PyTorch Lightning CIFAR10 Training")
 parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
