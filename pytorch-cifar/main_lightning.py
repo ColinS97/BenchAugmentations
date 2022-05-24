@@ -25,7 +25,7 @@ print("CPU Count:", os.cpu_count())
 
 PATH_DATASETS = "./data"
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
-NUM_WORKERS = int(os.cpu_count() / 2)
+NUM_WORKERS = 2  # int(os.cpu_count() / 2)
 
 parser = argparse.ArgumentParser(description="PyTorch Lightning CIFAR10 Training")
 parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
@@ -84,7 +84,7 @@ validate_args(args)
 train_transforms_list = []
 
 if args.baseline:
-    train_transforms_list.append(
+    train_transforms_list.extend(
         [
             torchvision.transforms.RandomCrop(32, padding=4),
             torchvision.transforms.RandomHorizontalFlip(),
@@ -92,17 +92,17 @@ if args.baseline:
     )
 
 if args.randaugment:
-    train_transforms_list.append(aug_lib.RandAugment(1, 30))
+    train_transforms_list.extend(aug_lib.RandAugment(1, 30))
 
 if args.trivialaugment:
-    train_transforms_list.append(aug_lib.TrivialAugment())
+    train_transforms_list.extend(aug_lib.TrivialAugment())
 
 
 if args.deepaugment:
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.append(
+train_transforms_list.extend(
     [torchvision.transforms.ToTensor(), cifar10_normalization()]
 )
 
