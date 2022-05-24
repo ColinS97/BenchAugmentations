@@ -92,10 +92,10 @@ if args.baseline:
     )
 
 if args.randaugment:
-    train_transforms_list.extend(aug_lib.RandAugment(1, 30))
+    train_transforms_list.append(aug_lib.RandAugment(1, 30))
 
 if args.trivialaugment:
-    train_transforms_list.extend(aug_lib.TrivialAugment())
+    train_transforms_list.append(aug_lib.TrivialAugment())
 
 
 if args.deepaugment:
