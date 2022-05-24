@@ -1,4 +1,5 @@
 import os
+import time
 
 import argparse
 import pandas as pd
@@ -194,7 +195,7 @@ model = LitResnet(lr=0.05)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    strategy="ddp",
+    strategy="ddp_find_unused_parameters_false",
     accelerator="gpu",
     devices="auto",
     logger=CSVLogger(save_dir="logs/"),
@@ -203,6 +204,12 @@ trainer = Trainer(
         TQDMProgressBar(refresh_rate=10),
     ],
 )
-
+start = time.time()
+print("Start:" + str(start))
 trainer.fit(model, cifar10_dm)
 trainer.test(model, datamodule=cifar10_dm)
+
+end = time.time()
+
+print("End:" + str(end))
+print("Duration:" + str(end - start))
