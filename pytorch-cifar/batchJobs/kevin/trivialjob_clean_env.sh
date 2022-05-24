@@ -3,9 +3,9 @@
 #SBATCH --no-requeue
 #SBATCH --partition=alpha
 #SBATCH --nodes=1                   
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --mem=8000
-#SBATCH --mincpus=4
+#SBATCH --mincpus=1
 #SBATCH --time=08:00:00                             
 #SBATCH --job-name=trivialaugment
 #SBATCH --mail-type=ALL
@@ -20,6 +20,6 @@ create_new_environment $SLURM_JOB_ID
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 
-python main_lightning.py --epochs 10 --trivialaugment
+python main_lightning.py --epochs 100 --trivialaugment
 
 remove_new_environment $SLURM_JOB_ID
