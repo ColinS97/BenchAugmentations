@@ -84,7 +84,7 @@ validate_args(args)
 train_transforms_list = [torchvision.transforms.ToPILImage()]
 
 if args.baseline:
-    train_transforms_list.append(
+    train_transforms_list.extend(
         [
             torchvision.transforms.RandomCrop(32, padding=4),
             torchvision.transforms.RandomHorizontalFlip(),
@@ -102,7 +102,7 @@ if args.deepaugment:
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.append(
+train_transforms_list.extend(
     [torchvision.transforms.ToTensor(), cifar10_normalization()]
 )
 
@@ -194,9 +194,9 @@ model = LitResnet(lr=0.05)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    accelerator="ddp",
-    gpus=-1,  # -1 equals the number of available gpus
     strategy="ddp",
+    accelerator="gpu",
+    devices="auto",
     logger=CSVLogger(save_dir="logs/"),
     callbacks=[
         LearningRateMonitor(logging_interval="step"),
