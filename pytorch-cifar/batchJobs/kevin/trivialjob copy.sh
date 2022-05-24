@@ -13,17 +13,13 @@
 #SBATCH --output=output-trivialaugment-%j.out
 #SBATCH --error=error-trivialaugment-%j.err
 
-source lib.sh
-
 module --force purge                          				
 module load modenv/hiera CUDA/11.3.1 GCC/11.2.0 Python/3.9.6
 
-create_or_reuse_environment
-
-which python
-which pip
+create_new_environment $SLURM_JOB_ID
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 
 python main_lightning.py --epochs 10 --trivialaugment
 
+remove_new_environment $SLURM_JOB_ID
