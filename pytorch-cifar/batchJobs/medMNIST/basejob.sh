@@ -30,4 +30,4 @@ cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-
 echo "FinalDir"
 echo pwd
 
-python main_lightning.py --epochs 100 --baseline
+python main_lightning_medMNIST.py --epochs 10 --baseline
