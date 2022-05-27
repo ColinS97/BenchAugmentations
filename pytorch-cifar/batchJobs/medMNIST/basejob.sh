@@ -20,7 +20,7 @@ source lib.sh
 
 
 echo "CurrentDir"
-echo pwd
+echo $(pwd)
 
 create_or_reuse_environment
 
@@ -28,6 +28,6 @@ cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-
 
 
 echo "FinalDir"
-echo pwd
+echo $(pwd)
 
 python main_lightning_medMNIST.py --epochs 10 --baseline
