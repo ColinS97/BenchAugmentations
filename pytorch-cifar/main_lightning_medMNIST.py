@@ -231,7 +231,7 @@ trainer = Trainer(
 )
 start = time.time()
 print("Start:" + str(start))
-trainer.fit(model, train_loader, val_loader=train_loader_at_eval)
+trainer.fit(model, train_loader, train_loader_at_eval)
 trainer.test(model, test_loader)
 
 end = time.time()
