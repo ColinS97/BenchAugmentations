@@ -23,6 +23,10 @@ from torchmetrics.functional import accuracy
 
 import aug_lib
 
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
 seed_everything(7)
 
 print("CPU Count:", os.cpu_count())
