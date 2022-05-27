@@ -24,8 +24,11 @@ remove_new_environment(){
     ws_release -F ssd $COMPUTE_WS_NAME
 }
 
+
+#TODO integrate check if new packages should be installed
 create_or_reuse_environment() {
-    ENV_PATH=/lustre/ssd/ws/cosi765e-pyjob_py39-cu11-torch-lightning
+    USER=$(whoami)
+    ENV_PATH="/lustre/ssd/ws/$USER-pyjob_py39-cu11-torch-lightning"
     if [ -d "$ENV_PATH" ] 
     then
         echo "Directory $ENV_PATH."
