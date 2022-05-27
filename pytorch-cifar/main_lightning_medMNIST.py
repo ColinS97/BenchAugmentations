@@ -11,7 +11,7 @@ import torchvision
 import medmnist
 from medmnist import INFO, Evaluator
 
-from pl_bolts.datamodules import CIFAR10DataModule
+# from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor
@@ -110,19 +110,12 @@ if args.deepaugment:
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.extend(
-    [torchvision.transforms.ToTensor(), cifar10_normalization()]
-)
+train_transforms_list.append(torchvision.transforms.ToTensor())
 
 
 train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
-test_transforms = torchvision.transforms.Compose(
-    [
-        torchvision.transforms.ToTensor(),
-        cifar10_normalization(),
-    ]
-)
+test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
 
 info = INFO["pathmnist"]
