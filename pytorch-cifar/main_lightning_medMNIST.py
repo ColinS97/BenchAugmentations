@@ -6,7 +6,10 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.data as data
 import torchvision
+import medmnist
+from medmnist import INFO, Evaluator
 
 from pl_bolts.datamodules import CIFAR10DataModule
 from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
@@ -117,13 +120,31 @@ test_transforms = torchvision.transforms.Compose(
     ]
 )
 
-cifar10_dm = CIFAR10DataModule(
-    data_dir=PATH_DATASETS,
-    batch_size=BATCH_SIZE,
-    num_workers=NUM_WORKERS,
-    train_transforms=train_transforms,
-    test_transforms=test_transforms,
-    val_transforms=test_transforms,
+
+info = INFO["pathmnist"]
+task = info["task"]
+n_channels = info["n_channels"]
+n_classes = len(info["label"])
+download = True
+
+DataClass = getattr(medmnist, info["python_class"])
+
+
+# load the data
+train_dataset = DataClass(split="train", transform=train_transforms, download=download)
+test_dataset = DataClass(split="test", transform=test_transforms, download=download)
+
+pil_dataset = DataClass(split="train", download=download)
+
+# encapsulate data into dataloader form
+train_loader = data.DataLoader(
+    dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True
+)
+train_loader_at_eval = data.DataLoader(
+    dataset=train_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
+)
+test_loader = data.DataLoader(
+    dataset=test_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
 )
 
 
@@ -206,8 +227,8 @@ trainer = Trainer(
 )
 start = time.time()
 print("Start:" + str(start))
-trainer.fit(model, cifar10_dm)
-trainer.test(model, datamodule=cifar10_dm)
+trainer.fit(model, train_loader, val_loader=train_loader_at_eval)
+trainer.test(model, test_loader)
 
 end = time.time()
 
