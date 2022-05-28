@@ -206,7 +206,10 @@ class LitResnet(LightningModule):
             weight_decay=5e-4,
         )
         # steps per epoch changed according to https://stackoverflow.com/questions/49922252/choosing-number-of-steps-per-epoch, previously had error ValueError: Tried to step 1752 times. The specified number of total steps is 1750
-        steps_per_epoch = len(train_dataset) // BATCH_SIZE
+        # still error Tried to step 3512 times. The specified number of total steps is 3510
+        steps_per_epoch = len(train_dataset) * 2 // BATCH_SIZE
+        print("len train_dataset", len(train_dataset))
+        print("steps_per_epoch", steps_per_epoch)
         scheduler_dict = {
             "scheduler": OneCycleLR(
                 optimizer,
