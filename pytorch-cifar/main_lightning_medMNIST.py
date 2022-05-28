@@ -167,11 +167,6 @@ class LitResnet(LightningModule):
 
         self.save_hyperparameters()
         self.model = create_model()
-        # define loss function and optimizer
-        if task == "multi-label, binary-class":
-            self.criterion = nn.BCEWithLogitsLoss()
-        else:
-            self.criterion = nn.CrossEntropyLoss()
 
     def forward(self, x):
         out = self.model(x)
@@ -179,27 +174,17 @@ class LitResnet(LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        y = y.squeeze()
         logits = self(x)
-        if task == "multi-label, binary-class":
-            targets = y.to(torch.float32)
-            loss = self.criterion(logits, targets)
-        else:
-            targets = y.squeeze().long()
-            loss = self.criterion(logits, targets)
         loss = F.nll_loss(logits, y)
         self.log("train_loss", loss)
         return loss
 
     def evaluate(self, batch, stage=None):
         x, y = batch
+        y = y.squeeze()
         logits = self(x)
-
-        if task == "multi-label, binary-class":
-            targets = y.to(torch.float32)
-            loss = self.criterion(logits, targets)
-        else:
-            targets = y.squeeze().long()
-            loss = self.criterion(logits, targets)
+        loss = F.nll_loss(logits, y)
         preds = torch.argmax(logits, dim=1)
         acc = accuracy(preds, y)
 

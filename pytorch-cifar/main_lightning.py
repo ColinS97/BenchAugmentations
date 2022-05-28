@@ -117,6 +117,15 @@ test_transforms = torchvision.transforms.Compose(
     ]
 )
 
+cifar10_dm = CIFAR10DataModule(
+    data_dir=PATH_DATASETS,
+    batch_size=BATCH_SIZE,
+    num_workers=NUM_WORKERS,
+    train_transforms=train_transforms,
+    test_transforms=test_transforms,
+    val_transforms=test_transforms,
+)
+
 
 def create_model():
     model = torchvision.models.resnet18(pretrained=False, num_classes=10)
