@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import CSVLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim.swa_utils import AveragedModel, update_bn
-from torchmetrics.functional import accuracy
+from torchmetrics.functional import accuracy, auc
 
 import aug_lib
 
@@ -155,8 +155,6 @@ train_dataset = DataClass(split="train", transform=train_transforms, download=do
 test_dataset = DataClass(split="test", transform=test_transforms, download=download)
 val_dataset = DataClass(split="val", transform=test_transforms, download=download)
 
-pil_dataset = DataClass(split="train", download=download)
-
 # encapsulate data into dataloader form
 train_loader = data.DataLoader(
     dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True
@@ -185,9 +183,6 @@ class LitResnet(LightningModule):
 
         self.save_hyperparameters()
         self.model = create_model()
-        self.train_evaluator = medmnist.Evaluator(data_flag, "train")
-        self.val_evaluator = medmnist.Evaluator(data_flag, "val")
-        self.test_evaluator = medmnist.Evaluator(data_flag, "test")
 
     def forward(self, x):
         out = self.model(x)
@@ -201,26 +196,26 @@ class LitResnet(LightningModule):
         self.log("train_loss", loss)
         return loss
 
-    def evaluate(self, batch, evaluator, stage=None):
+    def evaluate(self, batch, stage=None):
 
         x, targets = batch
         logits = self(x)
         targets = torch.squeeze(targets, 1).long()
-
         loss = F.cross_entropy(logits, targets)
-        outputs = F.softmax(logits, dim=1)
-        targets = targets.float().resize_(len(targets), 1)
-        auc, acc = evaluator.evaluate(outputs)
+        preds = F.softmax(logits, dim=1)
+        # targets = targets.float().resize_(len(targets), 1)
+        acc = accuracy(preds, targets)
+        auc = auc(preds, targets)
         if stage:
-            self.log(f"{stage}_loss", loss, prog_bar=True, sync_dist=True)
-            self.log(f"{stage}_acc", acc, prog_bar=True, sync_dist=True)
-            self.log(f"{stage}_auc", auc, prog_bar=True, sync_dist=True)
+            self.log(f"{stage}_loss", loss, sync_dist=True)
+            self.log(f"{stage}_acc", acc, sync_dist=True)
+            self.log(f"{stage}_auc", auc, sync_dist=True)
 
     def validation_step(self, batch, batch_idx):
-        self.evaluate(batch, self.val_evaluator, "val")
+        self.evaluate(batch, "val")
 
     def test_step(self, batch, batch_idx):
-        self.evaluate(batch, self.test_evaluator, "test")
+        self.evaluate(batch, "test")
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
