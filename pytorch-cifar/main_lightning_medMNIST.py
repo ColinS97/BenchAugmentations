@@ -195,7 +195,7 @@ class LitResnet(LightningModule):
 
     def training_step(self, batch, batch_idx):
         logits, targets = batch
-        targets = targets.squeeze()
+        targets = torch.squeeze(targets, 1).long()
         loss = F.cross_entropy(logits, targets)
         self.log("train_loss", loss)
         return loss
@@ -203,7 +203,7 @@ class LitResnet(LightningModule):
     def evaluate(self, batch, evaluator, stage=None):
 
         logits, targets = batch
-        targets = targets.squeeze()
+        targets = torch.squeeze(targets, 1).long()
 
         loss = F.cross_entropy(logits, targets)
         outputs = F.softmax(logits, dim=1)
