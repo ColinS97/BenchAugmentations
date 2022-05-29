@@ -10,8 +10,8 @@
 #SBATCH --job-name=baseline
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
-#SBATCH --output=output-base-%j.out
-#SBATCH --error=error-base-%j.out
+#SBATCH --output=output-noaug-%j.out
+#SBATCH --error=error-noaug-%j.out
 
 module --force purge                          				
 module load modenv/hiera CUDA/11.3.1 GCC/11.2.0 Python/3.9.6
@@ -30,4 +30,4 @@ cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-
 echo "FinalDir"
 echo $(pwd)
 
-python main_lightning_medMNIST.py --epochs 10 --baseline --slurm_id "$SLURM_JOB_ID"
+python main_lightning_medMNIST.py --epochs 10 --noaugment --slurm_id "$SLURM_JOB_ID"

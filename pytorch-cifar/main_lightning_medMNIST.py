@@ -18,7 +18,6 @@ from pytorch_lightning.loggers import CSVLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim.swa_utils import AveragedModel, update_bn
 
-# from torchmetrics.functional import accuracy, auc
 import torchmetrics.functional
 
 import aug_lib
@@ -162,11 +161,11 @@ train_loader = data.DataLoader(
     dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True
 )
 train_loader_at_eval = data.DataLoader(
-    dataset=train_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
+    dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=False
 )
 val_loader = data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 test_loader = data.DataLoader(
-    dataset=test_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
+    dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False
 )
 
 
@@ -205,7 +204,6 @@ class LitResnet(LightningModule):
         targets = torch.squeeze(targets, 1).long()
         loss = F.cross_entropy(logits, targets)
         preds = F.softmax(logits, dim=1)
-        # targets = targets.float().resize_(len(targets), 1)
         acc = torchmetrics.functional.accuracy(preds, targets)
         auc = torchmetrics.functional.auroc(preds, targets, num_classes=n_classes)
         if stage:
