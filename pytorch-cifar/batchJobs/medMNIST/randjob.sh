@@ -22,4 +22,4 @@ create_or_reuse_environment
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 
-python main_lightning.py --epochs 100 --randaugment
+python main_lightning.py --epochs 100 --randaugment --slurm_id "$SLURM_JOB_ID"

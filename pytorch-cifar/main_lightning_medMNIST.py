@@ -11,8 +11,6 @@ import torchvision
 import medmnist
 from medmnist import INFO, Evaluator
 
-from pl_bolts.datamodules import CIFAR10DataModule
-from pl_bolts.transforms.dataset_normalizations import cifar10_normalization
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.callbacks.progress import TQDMProgressBar
@@ -41,6 +39,9 @@ parser.add_argument(
     "--epochs", default=10, type=int, help="how many epochs should the net train for"
 )
 parser.add_argument(
+    "--slurm_id", default=00000000, type=int, help="slurm id for job array"
+)
+parser.add_argument(
     "--resume", "-r", action="store_true", help="resume from checkpoint"
 )
 parser.add_argument(
@@ -67,9 +68,18 @@ parser.add_argument(
     action="store_true",
     help="use trivialaugment transformer for data augmentation",
 )
+parser.add_argument(
+    "--noaugment",
+    "-na",
+    action="store_true",
+    help="use no augmentations",
+)
 
 
 args = parser.parse_args()
+
+epochs = args.epochs
+slurm_id = args.slurm_id
 
 
 def validate_args(args):
@@ -78,6 +88,7 @@ def validate_args(args):
         args.deepaugment,
         args.trivialaugment,
         args.baseline,
+        args.noaugment,
         args.resume,
     ]
     print(sum(bools))
@@ -90,8 +101,15 @@ def validate_args(args):
 validate_args(args)
 
 train_transforms_list = []
+aug_type = ""
+
+if args.noaugment:
+    aug_type = "noaugment"
+    print("Using no augmentation")
 
 if args.baseline:
+    # WARNING baseline is still adjusted to cifar10
+    aug_type = "baseline"
     train_transforms_list.extend(
         [
             torchvision.transforms.RandomCrop(32, padding=4),
@@ -100,29 +118,25 @@ if args.baseline:
     )
 
 if args.randaugment:
+    aug_type = "randaugment"
     train_transforms_list.append(aug_lib.RandAugment(1, 30))
 
 if args.trivialaugment:
+    aug_type = "trivialaugment"
     train_transforms_list.append(aug_lib.TrivialAugment())
 
 
 if args.deepaugment:
+    aug_type = "deepaugment"
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.extend(
-    [torchvision.transforms.ToTensor(), cifar10_normalization()]
-)
+train_transforms_list.append(torchvision.transforms.ToTensor())
 
 
 train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
-test_transforms = torchvision.transforms.Compose(
-    [
-        torchvision.transforms.ToTensor(),
-        cifar10_normalization(),
-    ]
-)
+test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
 
 info = INFO["pathmnist"]
@@ -229,7 +243,7 @@ trainer = Trainer(
     strategy="ddp",
     accelerator="gpu",
     devices="auto",
-    logger=CSVLogger(save_dir="logs/"),
+    logger=CSVLogger(save_dir="logs/pyjob_" + slurm_id + "_" + aug_type + "/"),
     callbacks=[
         LearningRateMonitor(logging_interval="step"),
         TQDMProgressBar(refresh_rate=10),

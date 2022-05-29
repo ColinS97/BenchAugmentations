@@ -6,8 +6,8 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=8000
 #SBATCH --mincpus=1
-#SBATCH --time=08:00:00                             
-#SBATCH --job-name=baseline
+#SBATCH --time=24:00:00                             
+#SBATCH --job-name=FullBenchmark
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-base-%j.out
@@ -30,4 +30,8 @@ cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-
 echo "FinalDir"
 echo $(pwd)
 
-python main_lightning_medMNIST.py --epochs 10 --baseline --slurm_id "$SLURM_JOB_ID"
+python main_lightning_medMNIST.py --epochs 100 --noaugment
+
+python main_lightning_medMNIST.py --epochs 100 --randaugment
+
+python main_lightning_medMNIST.py --epochs 100 --trivialaugment
