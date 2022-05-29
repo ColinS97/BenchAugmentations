@@ -6,10 +6,8 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=8000
 #SBATCH --mincpus=1
-#SBATCH --time=00:00:15                             
+#SBATCH --time=00:15:00                            
 #SBATCH --job-name=baseline_validate
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=colin.simon@mailbox.tu-dresden.de
 #SBATCH --output=output-base-%j.out
 #SBATCH --error=error-base-%j.out
 
