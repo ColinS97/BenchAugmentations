@@ -111,10 +111,7 @@ if args.baseline:
     # WARNING baseline is still adjusted to cifar10
     aug_type = "baseline"
     train_transforms_list.extend(
-        [
-            torchvision.transforms.RandomCrop(32, padding=4),
-            torchvision.transforms.RandomHorizontalFlip(),
-        ]
+        [torchvision.transforms.Normalize(mean=[0.5], std=[0.5])]
     )
 
 if args.randaugment:
@@ -131,15 +128,20 @@ if args.deepaugment:
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.append(torchvision.transforms.ToTensor())
+train_transforms_list.extend(
+    [
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(mean=[0.5], std=[0.5]),
+    ]
+)
 
 
 train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
 test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
-
-info = INFO["pathmnist"]
+data_flag = "pathmnist"
+info = INFO[data_flag]
 task = info["task"]
 n_channels = info["n_channels"]
 n_classes = len(info["label"])
@@ -151,6 +153,7 @@ DataClass = getattr(medmnist, info["python_class"])
 # load the data
 train_dataset = DataClass(split="train", transform=train_transforms, download=download)
 test_dataset = DataClass(split="test", transform=test_transforms, download=download)
+val_dataset = DataClass(split="val", transform=test_transforms, download=download)
 
 pil_dataset = DataClass(split="train", download=download)
 
@@ -161,6 +164,7 @@ train_loader = data.DataLoader(
 train_loader_at_eval = data.DataLoader(
     dataset=train_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
 )
+val_loader = data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 test_loader = data.DataLoader(
     dataset=test_dataset, batch_size=2 * BATCH_SIZE, shuffle=False
 )
@@ -176,67 +180,57 @@ def create_model():
 
 
 class LitResnet(LightningModule):
-    def __init__(self, lr=0.05):
+    def __init__(self, lr=0.001, milestones=[0.5 * epochs, 0.75 * epochs], gamma=0.1):
         super().__init__()
 
         self.save_hyperparameters()
         self.model = create_model()
+        self.train_evaluator = medmnist.Evaluator(data_flag, "train")
+        self.val_evaluator = medmnist.Evaluator(data_flag, "val")
+        self.test_evaluator = medmnist.Evaluator(data_flag, "test")
 
     def forward(self, x):
         out = self.model(x)
         return F.log_softmax(out, dim=1)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        y = y.squeeze()
-        logits = self(x)
-        loss = F.nll_loss(logits, y)
+        logits, targets = batch
+        targets = targets.squeeze()
+        loss = F.cross_entropy(logits, targets)
         self.log("train_loss", loss)
         return loss
 
-    def evaluate(self, batch, stage=None):
-        x, y = batch
-        y = y.squeeze()
-        logits = self(x)
-        loss = F.nll_loss(logits, y)
-        preds = torch.argmax(logits, dim=1)
-        acc = accuracy(preds, y)
+    def evaluate(self, batch, evaluator, stage=None):
 
+        logits, targets = batch
+        targets = targets.squeeze()
+
+        loss = F.cross_entropy(logits, targets)
+        outputs = F.softmax(logits, dim=1)
+        targets = targets.float().resize_(len(targets), 1)
+        auc, acc = evaluator.evaluate(outputs)
         if stage:
             self.log(f"{stage}_loss", loss, prog_bar=True, sync_dist=True)
             self.log(f"{stage}_acc", acc, prog_bar=True, sync_dist=True)
+            self.log(f"{stage}_auc", auc, prog_bar=True, sync_dist=True)
 
     def validation_step(self, batch, batch_idx):
-        self.evaluate(batch, "val")
+        self.evaluate(batch, self.val_evaluator, "val")
 
     def test_step(self, batch, batch_idx):
-        self.evaluate(batch, "test")
+        self.evaluate(batch, self.test_evaluator, "test")
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(
-            self.parameters(),
-            lr=self.hparams.lr,
-            momentum=0.9,
-            weight_decay=5e-4,
-        )
-        # steps per epoch changed according to https://stackoverflow.com/questions/49922252/choosing-number-of-steps-per-epoch, previously had error ValueError: Tried to step 1752 times. The specified number of total steps is 1750
-        # still error Tried to step 3512 times. The specified number of total steps is 3510
-        steps_per_epoch = len(train_dataset) * 2 // BATCH_SIZE
-        print("len train_dataset", len(train_dataset))
-        print("steps_per_epoch", steps_per_epoch)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         scheduler_dict = {
-            "scheduler": OneCycleLR(
-                optimizer,
-                0.1,
-                epochs=self.trainer.max_epochs,
-                steps_per_epoch=steps_per_epoch,
-            ),
-            "interval": "step",
+            "scheduler": torch.optim.lr_scheduler.MultiStepLR(
+                optimizer, milestones=self.hparams.milestones, gamma=self.hparams.gamma
+            )
         }
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
 
 
-model = LitResnet(lr=0.05)
+model = LitResnet(lr=0.001, milestones=[0.5 * epochs, 0.75 * epochs], gamma=0.1)
 
 trainer = Trainer(
     max_epochs=args.epochs,
@@ -251,7 +245,7 @@ trainer = Trainer(
 )
 start = time.time()
 print("Start:" + str(start))
-trainer.fit(model, train_loader, train_loader_at_eval)
+trainer.fit(model, train_loader, val_loader)
 trainer.test(model, test_loader)
 
 end = time.time()
