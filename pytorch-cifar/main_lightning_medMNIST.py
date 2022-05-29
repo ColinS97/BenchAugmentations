@@ -207,7 +207,7 @@ class LitResnet(LightningModule):
         preds = F.softmax(logits, dim=1)
         # targets = targets.float().resize_(len(targets), 1)
         acc = torchmetrics.functional.accuracy(preds, targets)
-        auc = torchmetrics.functional.auc(preds, targets)
+        auc = torchmetrics.functional.auroc(preds, targets)
         if stage:
             self.log(f"{stage}_loss", loss, sync_dist=True)
             self.log(f"{stage}_acc", acc, sync_dist=True)
