@@ -237,7 +237,7 @@ trainer = Trainer(
     strategy="ddp",
     accelerator="gpu",
     devices="auto",
-    logger=CSVLogger(save_dir="logs/pyjob_" + slurm_id + "_" + aug_type + "/"),
+    logger=CSVLogger(save_dir="logs/pyjob_" + str(slurm_id) + "_" + aug_type + "/"),
     callbacks=[
         LearningRateMonitor(logging_interval="step"),
         TQDMProgressBar(refresh_rate=10),
