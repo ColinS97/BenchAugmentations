@@ -17,7 +17,9 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import CSVLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim.swa_utils import AveragedModel, update_bn
-from torchmetrics.functional import accuracy, auc
+
+# from torchmetrics.functional import accuracy, auc
+import torchmetrics.functional
 
 import aug_lib
 
@@ -204,8 +206,8 @@ class LitResnet(LightningModule):
         loss = F.cross_entropy(logits, targets)
         preds = F.softmax(logits, dim=1)
         # targets = targets.float().resize_(len(targets), 1)
-        acc = accuracy(preds, targets)
-        auc = auc(preds, targets)
+        acc = torchmetrics.functional.accuracy(preds, targets)
+        auc = torchmetrics.functional.auc(preds, targets)
         if stage:
             self.log(f"{stage}_loss", loss, sync_dist=True)
             self.log(f"{stage}_acc", acc, sync_dist=True)
