@@ -8,8 +8,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import torchvision
-import medmnist
-from medmnist import INFO, Evaluator
+#import medmnist
+#from medmnist import INFO, Evaluator
+
+# additionally for LungColonCancer dataset
+from torch.utils.data import DataLoader, random_split
+from torchvision.datasets import DatasetFolder, ImageFolder
+from torchvision import transforms
+# additionally for LungColonCancer dataset
 
 from pytorch_lightning import LightningModule, Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor
@@ -30,11 +36,11 @@ seed_everything(7)
 
 print("CPU Count:", os.cpu_count())
 
-PATH_DATASETS = "./data"
+#PATH_DATASETS = "./dataset"
 BATCH_SIZE = 256 if torch.cuda.is_available() else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
 
-parser = argparse.ArgumentParser(description="PyTorch Lightning CIFAR10 Training")
+parser = argparse.ArgumentParser(description="PyTorch Lightning LungColonCancer Training")
 parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
 parser.add_argument(
     "--epochs", default=10, type=int, help="how many epochs should the net train for"
@@ -95,7 +101,7 @@ def validate_args(args):
     print(sum(bools))
     if sum(bools) > 1:
         raise ValueError(
-            "Only one of --randaugment, --deepaugment, --baseline, --trivialaugment, --resume can be used"
+            "Only one of --randaugment, --deepaugment, --trivialaugment, --baseline, --noaugment, --resume can be used"
         )
 
 
@@ -129,45 +135,104 @@ if args.deepaugment:
     raise ValueError("deepaugment not implemented yet")
 
 
-train_transforms_list.extend(
-    [
-        torchvision.transforms.ToTensor(),
-        torchvision.transforms.Normalize(mean=[0.5], std=[0.5]),
-    ]
-)
+#train_transforms_list.extend(
+#    [
+#        torchvision.transforms.ToTensor(),
+#        torchvision.transforms.Normalize(mean=[0.5], std=[0.5]),
+#    ]
+#)
 
 
-train_transforms = torchvision.transforms.Compose(train_transforms_list)
+#train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
-test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+#test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
-data_flag = "pathmnist"
-info = INFO[data_flag]
-task = info["task"]
-n_channels = info["n_channels"]
-n_classes = len(info["label"])
-download = True
+#data_flag = "pathmnist"
+#info = INFO[data_flag]
+#task = info["task"]
+#n_channels = info["n_channels"]
+#n_classes = len(info["label"])
+#download = True
 
-DataClass = getattr(medmnist, info["python_class"])
+#DataClass = getattr(medmnist, info["python_class"])
 
 
 # load the data
-train_dataset = DataClass(split="train", transform=train_transforms, download=download)
-test_dataset = DataClass(split="test", transform=test_transforms, download=download)
-val_dataset = DataClass(split="val", transform=test_transforms, download=download)
+data_dir = ".\LungColon"
+
+'''
+partly copied from https://github.com/tneumann/htw_cnn_lecture/blob/master/003_transfer_learning_sign_language.ipynb
+'''
+
+# imagenet pixel mean and std deviation
+imagenet_stats = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+
+test_transforms = transforms.Compose([
+    #transforms.Resize(23),
+    #transforms.CenterCrop(23),
+    transforms.ToTensor(),
+    transforms.Normalize(*imagenet_stats)
+])
+
+train_transforms_list.extend([
+    #transforms.Resize(23),
+    #transforms.CenterCrop(23),
+    # TODO: add more/other augmentations here
+    transforms.ToTensor(),
+    transforms.Normalize(*imagenet_stats)
+])
+
+train_transforms = torchvision.transforms.Compose(train_transforms_list)
+
+data_dir = '.\LungColon'
+
+full_dataset = ImageFolder(data_dir,train_transforms)
+"""valid dataset should change in every epoch and is part of the training dataset?"""
+#full_size = int(0.8 * len(full_dataset))
+#valid_size = len(full_dataset) - full_size
+#full_dataset, valid_dataset = random_split(full_dataset, [full_size, valid_size])
+
+train_size = int(0.8 * len(full_dataset))
+test_size = len(full_dataset) - train_size
+valid_size = int(0.1 * train_size)
+train_size = train_size - valid_size
+
+train_dataset, valid_dataset, test_dataset = random_split(full_dataset, [train_size, valid_size, test_size])
+
+
+train_loader = DataLoader(
+    train_dataset, batch_size=BATCH_SIZE, shuffle=True 
+)
+
+train_loader_at_eval = DataLoader(
+    train_dataset, batch_size=BATCH_SIZE, shuffle=False
+)
+test_loader = DataLoader(
+    test_dataset, batch_size=BATCH_SIZE, shuffle=True
+)
+
+val_loader = DataLoader(
+    valid_dataset, batch_size=BATCH_SIZE, shuffle=True
+)
+
+#train_dataset = DataClass(split="train", transform=train_transforms, download=download)
+#test_dataset = DataClass(split="test", transform=test_transforms, download=download)
+#val_dataset = DataClass(split="val", transform=test_transforms, download=download)
+
 
 # encapsulate data into dataloader form
-train_loader = data.DataLoader(
-    dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True
-)
-train_loader_at_eval = data.DataLoader(
-    dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=False
-)
-val_loader = data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-test_loader = data.DataLoader(
-    dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False
-)
+#train_loader = data.DataLoader(
+ #   dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True
+#)
+#train_loader_at_eval = data.DataLoader(
+ #   dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=False
+#)
+#val_loader = data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
+#test_loader = data.DataLoader(
+ #   dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False
+#)
 
+n_classes = len(full_dataset.classes)
 
 def create_model():
     model = torchvision.models.resnet18(pretrained=False, num_classes=n_classes)
