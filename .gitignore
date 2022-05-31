@@ -2,3 +2,4 @@
 /pytorch-cifar/__pycache__/
 /pytorch-cifar/models/__pycache__/
 /pytorch-cifar/deepaugment/__pycache__/
+pytorch-cifar/runs/29_05_2022/pyjob_26096220_noaugment/lightning_logs/version_0/checkpoints/epoch=99-step=35200.ckpt

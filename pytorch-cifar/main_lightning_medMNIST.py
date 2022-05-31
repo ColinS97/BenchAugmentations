@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import CSVLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim.swa_utils import AveragedModel, update_bn
-
+from models import ResNet18
 import torchmetrics.functional
 
 import aug_lib
@@ -111,9 +111,6 @@ if args.noaugment:
 if args.baseline:
     # WARNING baseline is still adjusted to cifar10
     aug_type = "baseline"
-    train_transforms_list.extend(
-        [torchvision.transforms.Normalize(mean=[0.5], std=[0.5])]
-    )
 
 if args.randaugment:
     aug_type = "randaugment"
@@ -139,7 +136,12 @@ train_transforms_list.extend(
 
 train_transforms = torchvision.transforms.Compose(train_transforms_list)
 
-test_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+test_transforms = torchvision.transforms.Compose(
+    [
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(mean=[0.5], std=[0.5]),
+    ]
+)
 
 data_flag = "pathmnist"
 info = INFO[data_flag]
@@ -170,11 +172,8 @@ test_loader = data.DataLoader(
 
 
 def create_model():
-    model = torchvision.models.resnet18(pretrained=False, num_classes=n_classes)
-    model.conv1 = nn.Conv2d(
-        3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False
-    )
-    model.maxpool = nn.Identity()
+    model = ResNet18(in_channels=n_channels, num_classes=n_classes)
+    # model.maxpool = nn.Identity()
     return model
 
 
@@ -231,7 +230,6 @@ model = LitResnet(lr=0.001, milestones=[0.5 * epochs, 0.75 * epochs], gamma=0.1)
 
 trainer = Trainer(
     max_epochs=args.epochs,
-    strategy="ddp",
     accelerator="gpu",
     devices="auto",
     logger=CSVLogger(save_dir="logs/pyjob_" + str(slurm_id) + "_" + aug_type + "/"),
