@@ -26,4 +26,4 @@ which pip
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/pytorch-cifar
 
-python main_lightning.py --epochs 100 --trivialaugment --slurm_id "$SLURM_JOB_ID"
+python main_lightning_medMNIST.py --epochs 100 --trivialaugment --slurm_id "$SLURM_JOB_ID"
