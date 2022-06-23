@@ -110,6 +110,7 @@ if args.noaugment:
 
 if args.baseline:
     # WARNING baseline is still adjusted to cifar10
+    print("WARNING baseline is still adjusted to cifar10")
     aug_type = "baseline"
 
 if args.randaugment:
@@ -232,7 +233,9 @@ trainer = Trainer(
     max_epochs=args.epochs,
     accelerator="gpu",
     devices="auto",
-    logger=CSVLogger(save_dir="logs/pyjob_" + str(slurm_id) + "_" + aug_type + "/"),
+    logger=CSVLogger(
+        save_dir="logs/pyjob_" + str(data_flag) + str(slurm_id) + "_" + aug_type + "/"
+    ),
     callbacks=[
         LearningRateMonitor(logging_interval="step"),
         TQDMProgressBar(refresh_rate=10),
