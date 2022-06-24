@@ -82,9 +82,12 @@ def main(
     if augmentation == "trivialaugment":
         train_transforms_list.append(aug_lib.TrivialAugment())
 
-    if args.deepaugment:
+    if augmentation == "deepaugment":
         aug_type = "deepaugment"
         raise ValueError("deepaugment not implemented yet")
+
+    if (len(train_transforms_list) == 0) and (augmentation != "none"):
+        raise ValueError("Augmentation" + augmentation + " unknown")
 
     if resize:
         train_transforms_list.extend(
