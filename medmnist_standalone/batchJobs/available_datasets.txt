@@ -1,0 +1,12 @@
+pathmnist 
+        chestmnist
+        dermamnist
+        octmnist
+        pneumoniamnist
+        retinamnist
+        breastmnist
+        bloodmnist
+        tissuemnist
+        organamnist
+        organcmnist
+        organsmnist
