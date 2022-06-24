@@ -60,7 +60,11 @@ def main(
     )
 
     output_root = os.path.join(
-        output_root, data_flag, augmentation, num_epochs, time.strftime("%y%m%d_%H%M%S")
+        output_root,
+        data_flag,
+        augmentation,
+        str(num_epochs),
+        time.strftime("%y%m%d_%H%M%S"),
     )
     if not os.path.exists(output_root):
         os.makedirs(output_root)
