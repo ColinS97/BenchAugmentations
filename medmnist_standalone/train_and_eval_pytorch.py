@@ -17,6 +17,8 @@ from models import ResNet18, ResNet50
 import medmnist
 from medmnist import INFO, Evaluator
 
+import aug_lib
+
 
 def main(
     data_flag,
@@ -26,6 +28,7 @@ def main(
     batch_size,
     download,
     model_flag,
+    augmentation,
     resize,
     as_rgb,
     model_path,
@@ -56,14 +59,38 @@ def main(
         torch.device("cuda:{}".format(gpu_ids[0])) if gpu_ids else torch.device("cpu")
     )
 
-    output_root = os.path.join(output_root, data_flag, time.strftime("%y%m%d_%H%M%S"))
+    output_root = os.path.join(
+        output_root, data_flag, augmentation, num_epochs, time.strftime("%y%m%d_%H%M%S")
+    )
     if not os.path.exists(output_root):
         os.makedirs(output_root)
 
     print("==> Preparing data...")
 
+    train_transforms_list = []
+
+    if augmentation == "none":
+        print("Using no augmentation")
+
+    if augmentation == "randaugment":
+        train_transforms_list.append(aug_lib.RandAugment(1, 30))
+
+    if augmentation == "trivialaugment":
+        train_transforms_list.append(aug_lib.TrivialAugment())
+
+    if args.deepaugment:
+        aug_type = "deepaugment"
+        raise ValueError("deepaugment not implemented yet")
+
     if resize:
-        data_transform = transforms.Compose(
+        train_transforms_list.extend(
+            [
+                transforms.Resize((224, 224), interpolation=PIL.Image.NEAREST),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5], std=[0.5]),
+            ]
+        )
+        test_transforms = transforms.Compose(
             [
                 transforms.Resize((224, 224), interpolation=PIL.Image.NEAREST),
                 transforms.ToTensor(),
@@ -71,18 +98,29 @@ def main(
             ]
         )
     else:
-        data_transform = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize(mean=[0.5], std=[0.5])]
+        train_transforms_list.extend(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5], std=[0.5]),
+            ]
+        )
+        test_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5], std=[0.5]),
+            ]
         )
 
+    train_transforms = transforms.Compose(train_transforms_list)
+
     train_dataset = DataClass(
-        split="train", transform=data_transform, download=download, as_rgb=as_rgb
+        split="train", transform=train_transforms, download=download, as_rgb=as_rgb
     )
     val_dataset = DataClass(
-        split="val", transform=data_transform, download=download, as_rgb=as_rgb
+        split="val", transform=test_transforms, download=download, as_rgb=as_rgb
     )
     test_dataset = DataClass(
-        split="test", transform=data_transform, download=download, as_rgb=as_rgb
+        split="test", transform=test_transforms, download=download, as_rgb=as_rgb
     )
 
     train_loader = data.DataLoader(
@@ -346,6 +384,12 @@ if __name__ == "__main__":
         "--resize", help="resize images of size 28x28 to 224x224", action="store_true"
     )
     parser.add_argument(
+        "--augmentation",
+        help="possible augmentations are trivialaugment and randaugment",
+        default="none",
+        type=str,
+    )
+    parser.add_argument(
         "--as_rgb", help="convert the grayscale image to RGB", action="store_true"
     )
     parser.add_argument(
@@ -375,6 +419,7 @@ if __name__ == "__main__":
     batch_size = args.batch_size
     download = args.download
     model_flag = args.model_flag
+    augmentation = args.augmentation
     resize = args.resize
     as_rgb = args.as_rgb
     model_path = args.model_path
@@ -388,6 +433,7 @@ if __name__ == "__main__":
         batch_size,
         download,
         model_flag,
+        augmentation,
         resize,
         as_rgb,
         model_path,
