@@ -22,5 +22,5 @@ create_or_reuse_environment
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/medmnist_standalone/
 
-python train_and_eval_pytorch.py --data_flag pathmnist --augmentation trivialaugment
-python train_and_eval_pytorch.py --data_flag pathmnist --augmentation randaugment
+python train_and_eval_pytorch.py --download --data_flag pathmnist --augmentation trivialaugment
+python train_and_eval_pytorch.py --download --data_flag pathmnist --augmentation randaugment
