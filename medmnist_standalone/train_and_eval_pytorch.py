@@ -60,7 +60,7 @@ def main(
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_ids[0])
 
     device = (
-        torch.device("cuda:{}".format(gpu_ids[0])) if gpu_ids else torch.device("cpu")
+        torch.device("cuda:{}".format(gpu_ids[0])) if gpu_ids else torch.device("mps")
     )
 
     output_root = os.path.join(
