@@ -66,7 +66,7 @@ def main(
     output_root = os.path.join(
         output_root,
         data_flag,
-        augmentation,
+        augmentation+"2_30",
         str(num_epochs),
         time.strftime("%y%m%d_%H%M%S"),
     )
@@ -81,7 +81,7 @@ def main(
         print("Using no augmentation")
 
     if augmentation == "randaugment":
-        train_transforms_list.append(aug_lib.RandAugment(1, 30))
+        train_transforms_list.append(aug_lib.RandAugment(2, 30))
 
     if augmentation == "trivialaugment":
         train_transforms_list.append(aug_lib.TrivialAugment())
