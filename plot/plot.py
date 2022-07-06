@@ -20,15 +20,26 @@ randaugment_df.drop(columns=["Wall time"], inplace=True)
 
 randaugment_df.rename(columns={"Value": "Randaugment"}, inplace=True)
 
+
+randaugment_2_df = pd.read_csv(
+    "plot/run-pathmnist_randaugment2_30_100_220705_164951_Tensorboard_Results-tag-test_acc.csv"
+)
+randaugment_2_df.drop(columns=["Wall time"], inplace=True)
+
+randaugment_2_df.rename(columns={"Value": "Randaugment_2_30"}, inplace=True)
+
+
 # join the dataframes on step
 none_df = none_df.merge(trivialaugment_df, on="Step")
 new_df = none_df.merge(randaugment_df, on="Step")
+new_df = new_df.merge(randaugment_2_df, on="Step")
+
 # none_df - none_df.merge(, on="Step")
 print(new_df.head())
 fig = px.line(
     new_df,
     x="Step",
-    y=["None", "Trivialaugment", "Randaugment"],
+    y=["None", "Trivialaugment", "Randaugment", "Randaugment_2_30"],
     labels={"x": "Epoch", "y": "Accuracy"},
     title="Accuracy of Models",
 )

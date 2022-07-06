@@ -22,5 +22,6 @@ create_or_reuse_environment
 
 cd /scratch/ws/0/cosi765e-python_virtual_environment/BenchAugmentations/medmnist_standalone/
 
-python train_and_eval_pytorch.py --download --num_epochs 100 --data_flag retinamnist --augmentation trivialaugment
-python train_and_eval_pytorch.py --download --num_epochs 100 --data_flag retinamnist --augmentation randaugment
+python train_and_eval_pytorch.py --download --num_epochs 300 --data_flag retinamnist --augmentation trivialaugment
+python train_and_eval_pytorch.py --download --num_epochs 300 --data_flag retinamnist --augmentation randaugment
+python train_and_eval_pytorch.py --download --num_epochs 300 --data_flag retinamnist --augmentation none
