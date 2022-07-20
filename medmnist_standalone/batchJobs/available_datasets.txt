@@ -1,0 +1,12 @@
+        pathmnist 
+        chestmnist -> started on 24.Jun
+        dermamnist -> started on 25.Jun
+        octmnist -> started on 25.Jun
+        pneumoniamnist -
+        retinamnist -
+        breastmnist - 
+        bloodmnist -
+        tissuemnist -
+        organamnist 
+        organcmnist
+        organsmnist
