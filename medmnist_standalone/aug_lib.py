@@ -434,10 +434,6 @@ def set_augmentation_space(
             median,
             gaussian,
         ]
-    elif "deepaugment" in augmentation_space:
-        pass
-        # since deepaug is using imgaug instead of pillow the transforms are not the same and can't be copied over completely trivially
-        # ALL_TRANSFORMS = [crop_bilinear, gaussian, rotate, shear_x, shear_y, translate_x, translate_y, sharpen, emboss, additive_gaussian_noise, dropout, coarse-dropout, gamma-contrast, brighten, invert, fog, clouds, add-to-hue-and-saturation, coarse-salt-pepper, horizontal-flip, vertical-flip ]
     elif "rasubsetof" in augmentation_space:
         r = re.findall(r"rasubsetof(\d+)", augmentation_space)
         assert len(r) == 1
@@ -629,6 +625,42 @@ def apply_augmentation(aug_idx, m, img):
     return ALL_TRANSFORMS[aug_idx].pil_transformer(1.0, m)(img)
 
 
+def apply_transform(aug_type, magnitude, img):
+    X = img
+    propability = 1.0
+    if aug_type == "<identity>":
+        X_aug = aug_lib.identity.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<AutoContrast>":
+        X_aug = aug_lib.auto_contrast.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Equalize>":
+        X_aug = aug_lib.equalize.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Rotate>":
+        X_aug = aug_lib.rotate.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Solarize>":
+        X_aug = aug_lib.solarize.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Color>":
+        X_aug = aug_lib.color.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Posterize>":
+        X_aug = aug_lib.posterize.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Contrast>":
+        X_aug = aug_lib.contrast.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Brightness>":
+        X_aug = aug_lib.brightness.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<Sharpness>":
+        X_aug = aug_lib.sharpness.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<ShearX>":
+        X_aug = aug_lib.shear_x.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<ShearY>":
+        X_aug = aug_lib.shear_y.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<TranslateX>":
+        X_aug = aug_lib.translate_x.pil_transformer(propability, magnitude)(X)
+    elif aug_type == "<TranslateY>":
+        X_aug = aug_lib.translate_y.pil_transformer(propability, magnitude)(X)
+    else:
+        raise ValueError
+    return X_aug
+
+
 def num_augmentations():
     return len(ALL_TRANSFORMS)
 
@@ -678,10 +710,15 @@ class UniAugmentWeighted:
 
 
 class DeepAugment:
-    # TODO: implement
+    def __init__(self, hyperparams):
+        self.hyperparams = hyperparams
+        self.augs = []
+        for i in range(0, len(hyperparams) - 1, 4):
+            self.augs.append(hyperparams[i : i + 4])
+
     def __call__(self, img):
-        op = random.choices(ALL_TRANSFORMS, k=1)[0]
+        op = random.choice(self.augs)
         print("op:", op)
-        level = random.randint(0, PARAMETER_MAX)
-        img = op.pil_transformer(1.0, level)(img)
+        img = apply_transform(op[0], op[1], img)
+        img = apply_transform(op[2], op[3], img)
         return img

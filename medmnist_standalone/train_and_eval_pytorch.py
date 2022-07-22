@@ -66,7 +66,7 @@ def main(
     output_root = os.path.join(
         output_root,
         data_flag,
-        augmentation+"2_30",
+        augmentation + "2_30",
         str(num_epochs),
         time.strftime("%y%m%d_%H%M%S"),
     )
@@ -87,8 +87,29 @@ def main(
         train_transforms_list.append(aug_lib.TrivialAugment())
 
     if augmentation == "deepaugment":
-        aug_type = "deepaugment"
-        raise ValueError("deepaugment not implemented yet")
+        hyperparams = [
+            "<Brightness>",
+            0,
+            "<Brightness>",
+            3,
+            "<ShearY>",
+            19,
+            "<Sharpness>",
+            4,
+            "<Solarize>",
+            24,
+            "<TranslateY>",
+            26,
+            "<Posterize>",
+            7,
+            "<Contrast>",
+            24,
+            "<Color>",
+            25,
+            "<identity>",
+            9,
+        ]
+        train_transforms_list.append(aug_lib.DeepAugment(hyperparams))
 
     if (len(train_transforms_list) == 0) and (augmentation != "none"):
         raise ValueError("Augmentation" + augmentation + " unknown")
