@@ -627,7 +627,7 @@ def apply_augmentation(aug_idx, m, img):
 
 def apply_transform(aug_type, magnitude, img):
     X = img
-    propability = 1.0
+    propability = 0.5
     if aug_type == "<identity>":
         X_aug = aug_lib.identity.pil_transformer(propability, magnitude)(X)
     elif aug_type == "<AutoContrast>":
