@@ -713,12 +713,13 @@ class DeepAugment:
     def __init__(self, hyperparams):
         self.hyperparams = hyperparams
         self.augs = []
+        print(hyperparams)
         for i in range(0, len(hyperparams) - 1, 4):
             self.augs.append(hyperparams[i : i + 4])
 
     def __call__(self, img):
         op = random.choice(self.augs)
-        print("op:", op)
+        # print("op:", op)
         img = apply_transform(op[0], op[1], img)
         img = apply_transform(op[2], op[3], img)
         return img
